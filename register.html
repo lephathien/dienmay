@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        #register-form {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 450px;
+        }
+
+        #register-form h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+            font-size: 24px;
+        }
+
+        #register-form div {
+            margin-bottom: 20px;
+        }
+
+        #register-form label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        #register-form input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        #register-form input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        #register-form button[type="submit"] {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        #register-form button[type="submit"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        #register-form button[type="submit"]:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Form đăng ký -->
+    <form id="register-form">
+        <h2>Đăng ký tài khoản</h2>
+        <div>
+            <label for="inp-username">Tên đăng nhập:</label>
+            <input type="text" id="inp-username" name="username" required>
+        </div>
+        <div>
+            <label for="inp-email">Email:</label>
+            <input type="email" id="inp-email" name="email" autocomplete="email" required>
+        </div>
+        <div>
+            <label for="inp-pwd">Mật khẩu:</label>
+            <input type="password" id="inp-pwd" name="password" autocomplete="new-password" required>
+        </div>
+        <div>
+            <label for="inp-confirm-pwd">Xác nhận mật khẩu:</label>
+            <input type="password" id="inp-confirm-pwd" name="confirm-password" autocomplete="new-password" required>
+        </div>
+        <button type="submit">Đăng ký</button>
+    </form>
+
+    <script src="https://www.gstatic.com/firebasejs/12.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore-compat.js"></script>
+    <script src="./configFirebase.js"></script>
+    <script>
+
+        // Cách đăng ký tài khoản bằng Email/Password
+        const inpUsername = document.querySelector("#inp-username");
+        const inpEmail = document.querySelector("#inp-email");
+        const inpPwd = document.querySelector("#inp-pwd");
+        const inpConfirmPwd = document.querySelector("#inp-confirm-pwd");
+        const registerForm = document.querySelector("#register-form");
+
+        function handleRegister(event) {
+            event.preventDefault(); // Ngăn chặn hành vi mặc định của form
+
+            let username = inpUsername.value;
+            let email = inpEmail.value;
+            let password = inpPwd.value;
+            let confirmPassword = inpConfirmPwd.value;
+
+            let role_id = 2; // Mặc định là quyền của guest. ( 1: Admin, 2: Guest )
+
+            // check fields empty
+            if (!username || !email || !password || !confirmPassword) {
+                alert("Vui lòng điền đủ các trường");
+                return;
+            }
+
+            if (password != confirmPassword) {
+                alert("Mật khẩu không khớp");
+                return;
+            }
+
+            // Tạo tài khoản với Firebase Auth
+            firebase
+                .auth()
+                .createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    //Signed in
+                    var user = userCredential.user;
+
+                    // Thông tin người dùng
+                    let userData = {
+                        username,
+                        email,
+                        password,
+                        // role: 'guest',
+                    };
+
+                    // // Đăng ký thành công
+                    alert("Đăng ký thành công");
+                    console.log("User registered: ", user.uid);
+                    // Lưu thông tin người dùng vào Firestore (nếu cần)
+                    // db.collection("users").add(userData);
+                    window.location.href = "./login.html";
+                })
+                .catch((error) => {
+                    console.log(error.message);
+                });
+        }
+        registerForm.addEventListener("submit", handleRegister);
+
+    </script>
+
+</body>
+
+</html>
